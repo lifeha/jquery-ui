@@ -114,6 +114,8 @@ $.widget( "ui.tooltip", {
 			} )
 			.appendTo( this.document[ 0 ].body );
 		this._addClass( this.liveRegion, null, "ui-helper-hidden-accessible" );
+
+		this.disabledTitles = $( [] );
 	},
 
 	_setOption: function( key, value ) {
@@ -143,25 +145,29 @@ $.widget( "ui.tooltip", {
 		} );
 
 		// Remove title attributes to prevent native tooltips
-		this.element.find( this.options.items ).addBack().each( function() {
-			var element = $( this );
-			if ( element.is( "[title]" ) ) {
-				element
-					.data( "ui-tooltip-title", element.attr( "title" ) )
-					.removeAttr( "title" );
-			}
-		} );
+		this.disabledTitles = this.disabledTitles.add(
+			this.element.find( this.options.items ).addBack()
+				.filter( function() {
+					var element = $( this );
+					if ( element.is( "[title]" ) ) {
+						return element
+							.data( "ui-tooltip-title", element.attr( "title" ) )
+							.removeAttr( "title" );
+					}
+				} )
+		);
 	},
 
 	_enable: function() {
 
 		// restore title attributes
-		this.element.find( this.options.items ).addBack().each( function() {
+		this.disabledTitles.each( function() {
 			var element = $( this );
 			if ( element.data( "ui-tooltip-title" ) ) {
 				element.attr( "title", element.data( "ui-tooltip-title" ) );
 			}
 		} );
+		this.disabledTitles = $( [] );
 	},
 
 	open: function( event ) {
@@ -446,6 +452,10 @@ $.widget( "ui.tooltip", {
 	},
 
 	_removeTooltip: function( tooltip ) {
+
+		// Clear the interval for delayed tracking tooltips
+		clearInterval( this.delayedShow );
+
 		tooltip.remove();
 		delete this.tooltips[ tooltip.attr( "id" ) ];
 	},

@@ -7,18 +7,18 @@ var
 	coreFiles = [
 		"core.js",
 		"widget.js",
-		"mouse.js",
-		"draggable.js",
-		"droppable.js",
-		"resizable.js",
-		"selectable.js",
-		"sortable.js",
+		"widgets/mouse.js",
+		"widgets/draggable.js",
+		"widgets/droppable.js",
+		"widgets/resizable.js",
+		"widgets/selectable.js",
+		"widgets/sortable.js",
 		"effect.js"
 	],
 
 	uiFiles = coreFiles.map(function( file ) {
 		return "ui/" + file;
-	}).concat( expandFiles( "ui/*.js" ).filter(function( file ) {
+	}).concat( expandFiles( "ui/**/*.js" ).filter(function( file ) {
 		return coreFiles.indexOf( file.substring( 3 ) ) === -1;
 	}) ),
 
@@ -173,12 +173,21 @@ grunt.initConfig({
 	},
 
 	jscs: {
-		all: {
+		ui: {
 			options: {
 				config: true
 			},
 			files: {
-				src: [ "demos/**/*.js", "build/**/*.js", "tests/**/*.js", "ui/**/*.js" ]
+				src: [ "demos/**/*.js", "build/**/*.js", "ui/**/*.js" ]
+			}
+		},
+		tests: {
+			options: {
+				config: true,
+				maximumLineLength: null
+			},
+			files: {
+				src: [ "tests/**/*.js" ]
 			}
 		}
 	},
@@ -238,21 +247,6 @@ grunt.initConfig({
 		}
 	},
 
-	esformatter: {
-		options: {
-			preset: "jquery"
-		},
-		ui: "ui/*.js",
-		tests: "tests/unit/**/*.js",
-		build: {
-			options: {
-				skipHashbang: true
-			},
-			src: "build/**/*.js"
-		},
-		grunt: "Gruntfile.js"
-	},
-
 	bowercopy: {
 		all: {
 			options: {
@@ -287,7 +281,7 @@ grunt.initConfig({
 				"jshint/LICENSE": "jshint/LICENSE",
 
 				"jquery/jquery.js": "jquery-1.x/dist/jquery.js",
-				"jquery/MIT-LICENSE.txt": "jquery-1.x/MIT-LICENSE.txt",
+				"jquery/LICENSE.txt": "jquery-1.x/LICENSE.txt",
 
 				"jquery-1.7.0/jquery.js": "jquery-1.7.0/jquery.js",
 				"jquery-1.7.0/MIT-LICENSE.txt": "jquery-1.7.0/MIT-LICENSE.txt",
@@ -337,6 +331,21 @@ grunt.initConfig({
 				"jquery-1.11.3/jquery.js": "jquery-1.11.3/dist/jquery.js",
 				"jquery-1.11.3/MIT-LICENSE.txt": "jquery-1.11.3/MIT-LICENSE.txt",
 
+				"jquery-1.12.0/jquery.js": "jquery-1.12.0/dist/jquery.js",
+				"jquery-1.12.0/LICENSE.txt": "jquery-1.12.0/LICENSE.txt",
+
+				"jquery-1.12.1/jquery.js": "jquery-1.12.1/dist/jquery.js",
+				"jquery-1.12.1/LICENSE.txt": "jquery-1.12.1/LICENSE.txt",
+
+				"jquery-1.12.2/jquery.js": "jquery-1.12.2/dist/jquery.js",
+				"jquery-1.12.2/LICENSE.txt": "jquery-1.12.2/LICENSE.txt",
+
+				"jquery-1.12.3/jquery.js": "jquery-1.12.3/dist/jquery.js",
+				"jquery-1.12.3/LICENSE.txt": "jquery-1.12.3/LICENSE.txt",
+
+				"jquery-1.12.4/jquery.js": "jquery-1.12.4/dist/jquery.js",
+				"jquery-1.12.4/LICENSE.txt": "jquery-1.12.4/LICENSE.txt",
+
 				"jquery-2.0.0/jquery.js": "jquery-2.0.0/jquery.js",
 				"jquery-2.0.0/MIT-LICENSE.txt": "jquery-2.0.0/MIT-LICENSE.txt",
 
@@ -359,7 +368,40 @@ grunt.initConfig({
 				"jquery-2.1.2/MIT-LICENSE.txt": "jquery-2.1.2/MIT-LICENSE.txt",
 
 				"jquery-2.1.3/jquery.js": "jquery-2.1.3/dist/jquery.js",
-				"jquery-2.1.3/MIT-LICENSE.txt": "jquery-2.1.3/MIT-LICENSE.txt"
+				"jquery-2.1.3/MIT-LICENSE.txt": "jquery-2.1.3/MIT-LICENSE.txt",
+
+				"jquery-2.1.4/jquery.js": "jquery-2.1.4/dist/jquery.js",
+				"jquery-2.1.4/MIT-LICENSE.txt": "jquery-2.1.4/MIT-LICENSE.txt",
+
+				"jquery-2.2.0/jquery.js": "jquery-2.2.0/dist/jquery.js",
+				"jquery-2.2.0/LICENSE.txt": "jquery-2.2.0/LICENSE.txt",
+
+				"jquery-2.2.1/jquery.js": "jquery-2.2.1/dist/jquery.js",
+				"jquery-2.2.1/LICENSE.txt": "jquery-2.2.1/LICENSE.txt",
+
+				"jquery-2.2.2/jquery.js": "jquery-2.2.2/dist/jquery.js",
+				"jquery-2.2.2/LICENSE.txt": "jquery-2.2.2/LICENSE.txt",
+
+				"jquery-2.2.3/jquery.js": "jquery-2.2.3/dist/jquery.js",
+				"jquery-2.2.3/LICENSE.txt": "jquery-2.2.3/LICENSE.txt",
+
+				"jquery-2.2.4/jquery.js": "jquery-2.2.4/dist/jquery.js",
+				"jquery-2.2.4/LICENSE.txt": "jquery-2.2.4/LICENSE.txt",
+
+				"jquery-3.0.0/jquery.js": "jquery-3.0.0/dist/jquery.js",
+				"jquery-3.0.0/LICENSE.txt": "jquery-3.0.0/LICENSE.txt",
+
+				"jquery-3.1.0/jquery.js": "jquery-3.1.0/dist/jquery.js",
+				"jquery-3.1.0/LICENSE.txt": "jquery-3.1.0/LICENSE.txt",
+
+				"jquery-3.1.1/jquery.js": "jquery-3.1.1/dist/jquery.js",
+				"jquery-3.1.1/LICENSE.txt": "jquery-3.1.1/LICENSE.txt",
+
+				"jquery-migrate-1.4.1/jquery-migrate.js": "jquery-migrate-1.4.1/dist/jquery-migrate.js",
+				"jquery-migrate-1.4.1/LICENSE.txt": "jquery-migrate-1.4.1/LICENSE.txt",
+
+				"jquery-migrate-3.0.0/jquery-migrate.js": "jquery-migrate-3.0.0/dist/jquery-migrate.js",
+				"jquery-migrate-3.0.0/LICENSE.txt": "jquery-migrate-3.0.0/LICENSE.txt"
 			}
 		}
 	},
@@ -393,7 +435,7 @@ grunt.initConfig({
 });
 
 grunt.registerTask( "update-authors", function() {
-	var getAuthors = require( "grunt-git-authors" ),
+	var getAuthors = require( "grunt-git-authors" ).getAuthors,
 		done = this.async();
 
 	getAuthors({

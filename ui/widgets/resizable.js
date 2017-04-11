@@ -99,9 +99,9 @@ $.widget( "ui.resizable", $.ui.mouse, {
 
 	_create: function() {
 
-		var n, i, handle, axis, hname, margins,
-			that = this,
-			o = this.options;
+		var margins,
+			o = this.options,
+			that = this;
 		this._addClass( "ui-resizable" );
 
 		$.extend( this, {
@@ -159,97 +159,9 @@ $.widget( "ui.resizable", $.ui.mouse, {
 			this._proportionallyResize();
 		}
 
-		this.handles = o.handles ||
-			( !$( ".ui-resizable-handle", this.element ).length ?
-				"e,s,se" : {
-					n: ".ui-resizable-n",
-					e: ".ui-resizable-e",
-					s: ".ui-resizable-s",
-					w: ".ui-resizable-w",
-					se: ".ui-resizable-se",
-					sw: ".ui-resizable-sw",
-					ne: ".ui-resizable-ne",
-					nw: ".ui-resizable-nw"
-				} );
-
-		this._handles = $();
-		if ( this.handles.constructor === String ) {
-
-			if ( this.handles === "all" ) {
-				this.handles = "n,e,s,w,se,sw,ne,nw";
-			}
-
-			n = this.handles.split( "," );
-			this.handles = {};
-
-			for ( i = 0; i < n.length; i++ ) {
-
-				handle = $.trim( n[ i ] );
-				hname = "ui-resizable-" + handle;
-				axis = $( "<div>" );
-				this._addClass( axis, "ui-resizable-handle " + hname );
-
-				axis.css( { zIndex: o.zIndex } );
-
-				this.handles[ handle ] = ".ui-resizable-" + handle;
-				this.element.append( axis );
-			}
-
-		}
-
-		this._renderAxis = function( target ) {
-
-			var i, axis, padPos, padWrapper;
-
-			target = target || this.element;
-
-			for ( i in this.handles ) {
-
-				if ( this.handles[ i ].constructor === String ) {
-					this.handles[ i ] = this.element.children( this.handles[ i ] ).first().show();
-				} else if ( this.handles[ i ].jquery || this.handles[ i ].nodeType ) {
-					this.handles[ i ] = $( this.handles[ i ] );
-					this._on( this.handles[ i ], { "mousedown": that._mouseDown } );
-				}
-
-				if ( this.elementIsWrapper && this.originalElement[ 0 ].nodeName.match( /^(textarea|input|select|button)$/i ) ) {
-
-					axis = $( this.handles[ i ], this.element );
-
-					padWrapper = /sw|ne|nw|se|n|s/.test( i ) ? axis.outerHeight() : axis.outerWidth();
-
-					padPos = [ "padding",
-						/ne|nw|n/.test( i ) ? "Top" :
-						/se|sw|s/.test( i ) ? "Bottom" :
-						/^e$/.test( i ) ? "Right" : "Left" ].join( "" );
-
-					target.css( padPos, padWrapper );
-
-					this._proportionallyResize();
-				}
-
-				this._handles = this._handles.add( this.handles[ i ] );
-			}
-		};
-
-		// TODO: make renderAxis a prototype function
-		this._renderAxis( this.element );
-
-		this._handles = this._handles.add( this.element.find( ".ui-resizable-handle" ) );
-		this._handles.disableSelection();
-
-		this._handles.on( "mouseover", function() {
-			if ( !that.resizing ) {
-				if ( this.className ) {
-					axis = this.className.match( /ui-resizable-(se|sw|ne|nw|n|e|s|w)/i );
-				}
-				that.axis = axis && axis[ 1 ] ? axis[ 1 ] : "se";
-			}
-		} );
+		this._setupHandles();
 
 		if ( o.autoHide ) {
-			this._handles.hide();
-			this._addClass( "ui-resizable-autohide" );
 			$( this.element )
 				.on( "mouseenter", function() {
 					if ( o.disabled ) {
@@ -304,6 +216,130 @@ $.widget( "ui.resizable", $.ui.mouse, {
 		_destroy( this.originalElement );
 
 		return this;
+	},
+
+	_setOption: function( key, value ) {
+		this._super( key, value );
+
+		switch ( key ) {
+		case "handles":
+			this._removeHandles();
+			this._setupHandles();
+			break;
+		case "aspectRatio":
+			this._aspectRatio = !!value;
+			break;
+		default:
+			break;
+		}
+	},
+
+	_setupHandles: function() {
+		var o = this.options, handle, i, n, hname, axis, that = this;
+		this.handles = o.handles ||
+			( !$( ".ui-resizable-handle", this.element ).length ?
+				"e,s,se" : {
+					n: ".ui-resizable-n",
+					e: ".ui-resizable-e",
+					s: ".ui-resizable-s",
+					w: ".ui-resizable-w",
+					se: ".ui-resizable-se",
+					sw: ".ui-resizable-sw",
+					ne: ".ui-resizable-ne",
+					nw: ".ui-resizable-nw"
+				} );
+
+		this._handles = $();
+		this._addedHandles = $();
+		if ( this.handles.constructor === String ) {
+
+			if ( this.handles === "all" ) {
+				this.handles = "n,e,s,w,se,sw,ne,nw";
+			}
+
+			n = this.handles.split( "," );
+			this.handles = {};
+
+			for ( i = 0; i < n.length; i++ ) {
+
+				handle = $.trim( n[ i ] );
+				hname = "ui-resizable-" + handle;
+				axis = $( "<div>" );
+				this._addClass( axis, "ui-resizable-handle " + hname );
+
+				axis.css( { zIndex: o.zIndex } );
+
+				this.handles[ handle ] = ".ui-resizable-" + handle;
+				if ( !this.element.children( this.handles[ handle ] ).length ) {
+					this.element.append( axis );
+					this._addedHandles = this._addedHandles.add( axis );
+				}
+			}
+
+		}
+
+		this._renderAxis = function( target ) {
+
+			var i, axis, padPos, padWrapper;
+
+			target = target || this.element;
+
+			for ( i in this.handles ) {
+
+				if ( this.handles[ i ].constructor === String ) {
+					this.handles[ i ] = this.element.children( this.handles[ i ] ).first().show();
+				} else if ( this.handles[ i ].jquery || this.handles[ i ].nodeType ) {
+					this.handles[ i ] = $( this.handles[ i ] );
+					this._on( this.handles[ i ], { "mousedown": that._mouseDown } );
+				}
+
+				if ( this.elementIsWrapper &&
+						this.originalElement[ 0 ]
+							.nodeName
+							.match( /^(textarea|input|select|button)$/i ) ) {
+					axis = $( this.handles[ i ], this.element );
+
+					padWrapper = /sw|ne|nw|se|n|s/.test( i ) ?
+						axis.outerHeight() :
+						axis.outerWidth();
+
+					padPos = [ "padding",
+						/ne|nw|n/.test( i ) ? "Top" :
+						/se|sw|s/.test( i ) ? "Bottom" :
+						/^e$/.test( i ) ? "Right" : "Left" ].join( "" );
+
+					target.css( padPos, padWrapper );
+
+					this._proportionallyResize();
+				}
+
+				this._handles = this._handles.add( this.handles[ i ] );
+			}
+		};
+
+		// TODO: make renderAxis a prototype function
+		this._renderAxis( this.element );
+
+		this._handles = this._handles.add( this.element.find( ".ui-resizable-handle" ) );
+		this._handles.disableSelection();
+
+		this._handles.on( "mouseover", function() {
+			if ( !that.resizing ) {
+				if ( this.className ) {
+					axis = this.className.match( /ui-resizable-(se|sw|ne|nw|n|e|s|w)/i );
+				}
+				that.axis = axis && axis[ 1 ] ? axis[ 1 ] : "se";
+			}
+		} );
+
+		if ( o.autoHide ) {
+			this._handles.hide();
+			this._addClass( "ui-resizable-autohide" );
+		}
+	},
+
+	_removeHandles: function() {
+		this._addedHandles.remove();
 	},
 
 	_mouseCapture: function( event ) {
@@ -582,7 +618,7 @@ $.widget( "ui.resizable", $.ui.mouse, {
 			isminw = this._isNumber( data.width ) && o.minWidth && ( o.minWidth > data.width ),
 			isminh = this._isNumber( data.height ) && o.minHeight && ( o.minHeight > data.height ),
 			dw = this.originalPosition.left + this.originalSize.width,
-			dh = this.position.top + this.size.height,
+			dh = this.originalPosition.top + this.originalSize.height,
 			cw = /sw|nw|w/.test( a ), ch = /nw|ne|n/.test( a );
 		if ( isminw ) {
 			data.width = o.minWidth;
@@ -772,7 +808,10 @@ $.ui.plugin.add( "resizable", "animate", {
 			ista = pr.length && ( /textarea/i ).test( pr[ 0 ].nodeName ),
 			soffseth = ista && that._hasScroll( pr[ 0 ], "left" ) ? 0 : that.sizeDiff.height,
 			soffsetw = ista ? 0 : that.sizeDiff.width,
-			style = { width: ( that.size.width - soffsetw ), height: ( that.size.height - soffseth ) },
+			style = {
+				width: ( that.size.width - soffsetw ),
+				height: ( that.size.height - soffseth )
+			},
 			left = ( parseFloat( that.element.css( "left" ) ) +
 				( that.position.left - that.originalPosition.left ) ) || null,
 			top = ( parseFloat( that.element.css( "top" ) ) +
@@ -814,7 +853,9 @@ $.ui.plugin.add( "resizable", "containment", {
 			o = that.options,
 			el = that.element,
 			oc = o.containment,
-			ce = ( oc instanceof $ ) ? oc.get( 0 ) : ( /parent/.test( oc ) ) ? el.parent().get( 0 ) : oc;
+			ce = ( oc instanceof $ ) ?
+				oc.get( 0 ) :
+				( /parent/.test( oc ) ) ? el.parent().get( 0 ) : oc;
 
 		if ( !ce ) {
 			return;

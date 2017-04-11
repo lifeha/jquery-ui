@@ -9,7 +9,9 @@
 
 //>>label: Selectmenu
 //>>group: Widgets
+// jscs:disable maximumLineLength
 //>>description: Duplicates and extends the functionality of a native HTML select element, allowing it to be customizable in behavior and appearance far beyond the limitations of a native select.
+// jscs:enable maximumLineLength
 //>>docs: http://api.jqueryui.com/selectmenu/
 //>>demos: http://jqueryui.com/selectmenu/
 //>>css.structure: ../../themes/base/core.css
@@ -84,7 +86,7 @@ return $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 	},
 
 	_drawButton: function() {
-		var icon, space,
+		var icon,
 			that = this,
 			item = this._parseOption(
 				this.element.find( "option:selected" ),
@@ -119,12 +121,8 @@ return $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 		this._addClass( this.button, "ui-selectmenu-button ui-selectmenu-button-closed",
 			"ui-button ui-widget" );
 
-		icon = $( "<span>" ).prependTo( this.button );
-		space = $( "<span> </span>" );
-		this._addClass( space, "ui-selectmenu-icon-space" );
-		this._addClass( icon, null, "ui-icon " + this.options.icons.button );
-		icon.after( space );
-
+		icon = $( "<span>" ).appendTo( this.button );
+		this._addClass( icon, "ui-selectmenu-icon", "ui-icon " + this.options.icons.button );
 		this.buttonItem = this._renderButtonItem( item )
 			.appendTo( this.button );
 
@@ -658,6 +656,10 @@ return $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 		var that = this,
 			data = [];
 		options.each( function( index, item ) {
+			if ( item.hidden ) {
+				return;
+			}
+
 			data.push( that._parseOption( $( item ), index ) );
 		} );
 		this.items = data;
